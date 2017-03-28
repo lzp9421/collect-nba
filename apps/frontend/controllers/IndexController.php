@@ -47,7 +47,7 @@ class IndexController extends Controller
         $injuries->status = $data['2'];
         $injuries->date = $data['3'];
         $injuries->comment = $data['4'];
-        $fields = ['playerId', 'playerCode', 'teamId', 'teamCode', 'teamName'];
+        $fields = ['playerId', 'playerCode', 'teamId', 'teamCode', 'teamName', 'createtime', 'updatetime'];
         foreach ($fields as $field) {
             $injuries->$field = $player->$field;
         }
