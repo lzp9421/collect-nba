@@ -63,10 +63,10 @@ class Module implements ModuleDefinitionInterface
         $di->set('db', function () {
             return new Mysql(
                 [
-                    "host" => "localhost",
-                    "username" => "root",
+                    "host" => "127.0.0.1",
+                    "username" => "collect",
                     "password" => "secret",
-                    "dbname" => "invo"
+                    "dbname" => "collect"
                 ]
             );
         });

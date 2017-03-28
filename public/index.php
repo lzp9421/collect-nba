@@ -84,5 +84,7 @@ class Application extends BaseApplication
     }
 }
 
+require "../vendor/autoload.php";
+
 $application = new Application();
 $application->main();
