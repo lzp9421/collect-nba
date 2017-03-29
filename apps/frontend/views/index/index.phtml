@@ -1,3 +1,217 @@
-<h1>Welcome</h1>
+<!doctype html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="statics/bootstrap/bootstrap.css">
+    <link rel="stylesheet" href="statics/sweetalert/sweetalert.css">
+    <title>Document</title>
+    <style>
+        p.help-block {
+            padding-top: 8px;
+            word-spacing: 3px;
+        }
+        .form-group {
+            max-width: 960px;
+        }
+        div.col-md-6 {
+            height: 800px;
+            overflow: scroll;
+        }
+    </style>
+</head>
+<body class="container-fluid">
+<div class="row">
+    <div class="col-xs-12 col-md-6">
+        <table class="table table-hover table-striped" id="list">
+            <thead>
+            <tr class="info">
+                <th>球员</th>
+                <th>英文评论</th>
+                <th>中文评论</th>
+            </tr>
+            </thead>
+            <tbody>
+            <?php
+            foreach ($injuries as $item) {
+            ?>
+                <tr class="translate <?= $item->isShow ? 'warning' : 'success' ?>" injuries-id="<?= $item->id ?>" style="cursor: pointer">
+                    <td><?= $item->displayName ?></td>
+                    <td><?= mb_strimwidth($item->comment,0,50,'...') ?></td>
+                    <td class="comment_cn"><?= mb_strimwidth($item->commentCn,0,50,'...') ?></td>
+                </tr>
+            <?php
+            }
+            ?>
+            </tbody>
+        </table>
+    </div>
+    <div class="col-xs-12 col-md-6">
 
-<?php echo $this->url->get(['for' => 'frontend', 'controller' => 'index', 'action' => 'index']) ?>
+        <div class="panel panel-info">
+            <div class="panel-heading">
+                <h3 class="panel-title">翻译</h3>
+            </div>
+            <div class="panel-body">
+                <form>
+
+                    <input type="hidden" id="id" class="sr-only">
+
+                    <div class="form-group center-block">
+                        <div class="row">
+                            <div class="col-md-2 hidden-sm hidden-xs">
+                                <label for="displayName" class="form-control-static">球员</label>
+                            </div>
+                            <div class="col-md-10">
+                                <p class="well well-sm">
+                                    <span id="displayName"></span>
+                                    (<span id="displayNameEn" class="text-muted"></span>)
+                                </p>
+                            </div>
+                        </div>
+                        <hr>
+                    </div>
+
+                    <div class="form-group center-block">
+                        <div class="row">
+                            <div class="col-md-2 hidden-sm hidden-xs">
+                                <label for="dateCN" class="form-control-static">日期</label>
+                            </div>
+                            <div class="col-md-10">
+                                <p class="well well-sm">
+                                    <span id="dateCn"></span>
+                                    (<span id="date" class="text-muted"></span>)
+                                </p>
+                            </div>
+                        </div>
+                        <hr>
+                    </div>
+
+                    <div class="form-group center-block">
+                        <div class="row">
+                            <div class="col-md-2 hidden-sm hidden-xs">
+                                <label for="statusCn" class="form-control-static">状态</label>
+                            </div>
+                            <div class="col-md-10">
+                                <input type="text" name="statusCn" id="statusCn" placeholder="状态" class="form-control">
+                                <p id="status" class="help-block">　</p>
+                            </div>
+                        </div>
+                        <hr>
+                    </div>
+
+                    <div class="form-group center-block">
+                        <div class="row">
+                            <div class="col-md-2 hidden-sm hidden-xs">
+                                <label for="commentCn" class="form-control-static">评论</label>
+                            </div>
+                            <div class="col-md-10">
+                                <textarea name="commentCn" id="commentCn" rows="8" placeholder="评论" class="form-control"></textarea>
+                                <p id="comment" class="help-block">　</p>
+                            </div>
+                        </div>
+                        <hr>
+                    </div>
+
+                    <div class="form-group center-block">
+                        <div class="row">
+                            <div class="col-md-1 hidden-sm hidden-xs">
+                            </div>
+                            <div class="col-md-11">
+                                <button type="button" id="update" class="btn btn-primary center-block btn-block">提交</button>
+                            </div>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script src="statics/jquery/jquery.min.js"></script>
+<script src="statics/sweetalert/sweetalert.min.js"></script>
+<script>
+    $(function () {
+
+        var show = function (func, id) {
+            id = Number(id) ? Number(id) : 0;
+            $.get('api/show/' + id, function (data) {
+                for (key in data) {
+                    func($('#' + key), data[key]);
+                }
+            });
+        };
+
+        var setTableSuccess = function (id, comment_cn) {
+            var tr = $(".translate[injuries-id='" + id + "']");
+            tr.removeClass('warning');
+            tr.removeClass('info');
+            tr.addClass('success');
+            var td = tr.find('.comment_cn');
+            td.text(comment_cn);
+        };
+
+        show(function (obj, value) {
+            obj.text(value);
+            obj.val(value);
+        });
+
+        $('#update').on('click', function () {
+            $('#update').attr("disabled", "true");
+            var id = $('#id').val();
+            var display_name = $('#displayName').val();
+            var status_cn = $('#statusCn').val();
+            var date_cn = $('#dateCn').val();
+            var comment_cn = $('#commentCn').val();
+            $.post('api/update/' + id, {
+                displayName: display_name,
+                statusCn: status_cn,
+                dateCn: date_cn,
+                commentCn: comment_cn
+            }, function (data) {
+                if (data.status === 'success') {
+                    setTableSuccess(id, comment_cn);
+                    sweetAlert({
+                        type: "success",
+                        title: "提交成功!",
+                        text: "即将进入下一题。",
+                        timer: 1000,
+                        showConfirmButton: false
+                    });
+                    show(function (obj, value) {
+                        obj.animate({opacity: 0}, function () {
+                            obj.text(value);
+                            obj.val(value);
+                            obj.animate({opacity: 1});
+                        });
+                    });
+                } else {
+                    sweetAlert({
+                        type: "error",
+                        title: "提交失败!",
+                        text: data.data,
+                        timer: 5000,
+                        showConfirmButton: true
+                    });
+                }
+                $('#update').removeAttr("disabled");
+            });
+        });
+
+        $('.translate').on('click', function () {
+            show(function (obj, value) {
+                obj.animate({opacity: 0}, function () {
+                    obj.text(value);
+                    obj.val(value);
+                    obj.animate({opacity: 1});
+                });
+            }, $(this).attr('injuries-id'));
+        });
+
+    });
+</script>
+</body>
+</html>
