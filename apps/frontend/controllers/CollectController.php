@@ -2,7 +2,6 @@
 
 namespace Multiple\Frontend\Controllers;
 
-use function MongoDB\BSON\toJSON;
 use PHPHtmlParser\Dom;
 use Multiple\Frontend\Models\NbaInjuries;
 use Multiple\Frontend\Models\NbaPlayer;
@@ -13,14 +12,22 @@ class CollectController extends BaseController
     {
         $html = $this->getHtml('http://www.espn.com/nba/injuries');
         array_walk($this->parseHtml($html), function (&$data) {
-            $this->saveInjuries($data);
+            try {
+                if (!$this->saveInjuries($data)) {
+                    throw new \Exception('保存失败');
+                }
+                $this->response->setJsonContent(['status' => 'success']);
+            } catch (\Exception $e) {
+                $this->response->setJsonContent(['status' => 'error', 'data' => $e->getMessage()]);
+            }
         });
-        return json_encode(['status' => 'success'], JSON_UNESCAPED_UNICODE);
+        $this->response->send();
     }
 
     /**
      * 保存一条信息
      * @param $data
+     * @return bool
      * @throws \Exception
      */
     protected function saveInjuries($data)
@@ -59,13 +66,17 @@ class CollectController extends BaseController
             $injuries->date = $date;
             $injuries->dateCn = (new \DateTime($data['3'], new \DateTimeZone('UTC')))->format('m月d日');
             $injuries->comment = $comment;
+            $injuries->updatetime = $injuries->createtime = date('Y-m-d H:i:s');
+            $injuries->isShow = 1;
             // 从球员信息中复制信息
-            $fields = ['playerId', 'playerCode', 'displayName', 'teamId', 'teamCode', 'teamName', 'createtime', 'updatetime'];
+            $fields = ['playerId', 'playerCode', 'displayName', 'teamId', 'teamCode', 'teamName'];
             foreach ($fields as $field) {
                 $injuries->$field = $player->$field;
             }
-            $injuries->save();
+        } else {
+            $injuries->updatetime = date('Y-m-d H:i:s');
         }
+        return $injuries->save();
 
     }
 
