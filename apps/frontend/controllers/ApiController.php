@@ -7,10 +7,6 @@ use Multiple\Frontend\Models\NbaPlayer;
 
 class ApiController extends BaseController
 {
-    public function listAction()
-    {
-
-    }
 
     /**
      * 获取一条信息

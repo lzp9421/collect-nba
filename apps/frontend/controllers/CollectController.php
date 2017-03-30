@@ -8,8 +8,11 @@ use Multiple\Frontend\Models\NbaPlayer;
 
 class CollectController extends BaseController
 {
-    public function indexAction()
+    private $datatime;
+
+    public function indexAction($injuries)
     {
+        $this->datatime = date('Y-m-d H:i:s');
         $html = $this->getHtml('http://www.espn.com/nba/injuries');
         array_walk($this->parseHtml($html), function (&$data) {
             try {
@@ -21,7 +24,10 @@ class CollectController extends BaseController
                 $this->response->setJsonContent(['status' => 'error', 'data' => $e->getMessage()]);
             }
         });
-        $this->response->send();
+        // 标记失效等消息
+        $this->modelsManager->executeQuery("UPDATE Multiple\\Frontend\\Models\\NbaInjuries SET isShow = 2 WHERE updatetime < '{$this->datatime}'");
+
+        return $this->response;
     }
 
     /**
@@ -66,7 +72,7 @@ class CollectController extends BaseController
             $injuries->date = $date;
             $injuries->dateCn = (new \DateTime($data['3'], new \DateTimeZone('UTC')))->format('m月d日');
             $injuries->comment = $comment;
-            $injuries->updatetime = $injuries->createtime = date('Y-m-d H:i:s');
+            $injuries->updatetime = $injuries->createtime = $this->datatime;
             $injuries->isShow = 1;
             // 从球员信息中复制信息
             $fields = ['playerId', 'playerCode', 'displayName', 'teamId', 'teamCode', 'teamName'];
@@ -74,7 +80,7 @@ class CollectController extends BaseController
                 $injuries->$field = $player->$field;
             }
         } else {
-            $injuries->updatetime = date('Y-m-d H:i:s');
+            $injuries->updatetime = $this->datatime;
         }
         return $injuries->save();
 

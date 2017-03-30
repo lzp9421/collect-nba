@@ -19,6 +19,14 @@
             height: 800px;
             overflow: scroll;
         }
+        #list .selected {
+            box-sizing: border-box;
+            border-left: 4px solid #F8BB86;
+            font-weight: bolder;
+        }
+        .danger td {
+            text-decoration: line-through;
+        }
     </style>
 </head>
 <body class="container-fluid">
@@ -28,18 +36,20 @@
             <thead>
             <tr class="info">
                 <th>球员</th>
-                <th>英文评论</th>
-                <th>中文评论</th>
+                <th>摘要</th>
+                <th>采集时间</th>
+                <th>状态</th>
             </tr>
             </thead>
             <tbody>
             <?php
-            foreach ($injuries as $item) {
+            foreach ($injuries as $key => $item) {
             ?>
-                <tr class="translate <?= $item->isShow ? 'warning' : 'success' ?>" injuries-id="<?= $item->id ?>" style="cursor: pointer">
+                <tr class="translate <?= $item->isShow ? (intval($item->isShow) === 1 ? 'active' : 'danger') : 'success' ?>" injuries-id="<?= $item->id ?>" style="cursor: pointer">
                     <td><?= $item->displayName ?></td>
-                    <td><?= mb_strimwidth($item->comment,0,50,'...') ?></td>
-                    <td class="comment_cn"><?= mb_strimwidth($item->commentCn,0,50,'...') ?></td>
+                    <td class="comment_cn"><?= mb_strimwidth($item->comment,0,40,'...') ?></td>
+                    <td><?= (new \DateTime($item->updatetime, new \DateTimeZone('UTC')))->format('m-d H:i') ?></td>
+                    <td class="comment_cn"><?= $item->isShow ? (intval($item->isShow) === 1 ? '未翻译' : '已失效') : '已翻译' ?></td>
                 </tr>
             <?php
             }
@@ -139,18 +149,20 @@
         var show = function (func, id) {
             id = Number(id) ? Number(id) : 0;
             $.get('api/show/' + id, function (data) {
-                data = JSON.parse(data);
                 for (key in data) {
                     func($('#' + key), data[key]);
                 }
-            });
+                $("#list .selected").removeClass('selected');
+                $(".translate[injuries-id='" + data['id'] + "']").addClass('selected');
+            }, "json");
         };
 
         var setTableSuccess = function (id, comment_cn) {
             var tr = $(".translate[injuries-id='" + id + "']");
-            tr.removeClass('warning');
-            tr.removeClass('info');
-            tr.addClass('success');
+            if (!tr.hasClass('danger')) {
+                tr.removeClass('active');
+                tr.addClass('success');
+            }
             var td = tr.find('.comment_cn');
             td.text(comment_cn);
         };
@@ -158,7 +170,7 @@
         show(function (obj, value) {
             obj.text(value);
             obj.val(value);
-        });
+        }, $('.translate:first').attr('injuries-id'));
 
         $('#update').on('click', function () {
             $('#update').attr("disabled", "true");
@@ -173,7 +185,6 @@
                 dateCn: date_cn,
                 commentCn: comment_cn
             }, function (data) {
-                data = JSON.parse(data);
                 if (data.status === 'success') {
                     setTableSuccess(id, comment_cn);
                     sweetAlert({
@@ -200,7 +211,7 @@
                     });
                 }
                 $('#update').removeAttr("disabled");
-            });
+            }, "json");
         });
 
         $('.translate').on('click', function () {
