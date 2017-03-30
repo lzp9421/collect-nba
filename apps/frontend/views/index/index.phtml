@@ -139,6 +139,7 @@
         var show = function (func, id) {
             id = Number(id) ? Number(id) : 0;
             $.get('api/show/' + id, function (data) {
+                data = JSON.parse(data);
                 for (key in data) {
                     func($('#' + key), data[key]);
                 }
@@ -172,6 +173,7 @@
                 dateCn: date_cn,
                 commentCn: comment_cn
             }, function (data) {
+                data = JSON.parse(data);
                 if (data.status === 'success') {
                     setTableSuccess(id, comment_cn);
                     sweetAlert({
