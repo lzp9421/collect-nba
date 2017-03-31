@@ -2,6 +2,7 @@
 
 namespace Multiple\Frontend\Controllers;
 
+use Phalcon\Db\Adapter\Pdo\Mysql;
 use PHPHtmlParser\Dom;
 use Multiple\Frontend\Models\NbaInjuries;
 use Multiple\Frontend\Models\NbaPlayer;
@@ -10,7 +11,7 @@ class CollectController extends BaseController
 {
     private $datatime;
     private $new_data = 0;
-    private $sum_data = 0;
+    private $real_time_data = 0;
     private $start_time;
 
     public function initialize()
@@ -23,24 +24,28 @@ class CollectController extends BaseController
     {
         $this->datatime = date('Y-m-d H:i:s');
         $html = $this->getHtml('http://www.espn.com/nba/injuries');
-        array_walk($this->parseHtml($html), function (&$data) {
-            try {
-                if (!$this->saveInjuries($data)) {
-                    throw new \Exception('保存失败');
-                }
-                $this->response->setJsonContent([
-                    'status' => 'success',
-                    'sum_data' => $this->sum_data,
-                    'new_data' => $this->new_data,
-                    'time' => sprintf('%.4f', round(microtime(true) - $this->start_time, 4)),
-                ]);
-            } catch (\Exception $e) {
-                $this->response->setJsonContent(['status' => 'error', 'data' => $e->getMessage()]);
+        foreach($this->parseHtml($html) as $data) {
+            if (!$this->saveInjuries($data)) {
+                throw new \Exception('保存失败');
             }
-        });
-        // 标记失效等消息
-        $this->modelsManager->executeQuery("UPDATE Multiple\\Frontend\\Models\\NbaInjuries SET isShow = 2 WHERE updatetime < '{$this->datatime}'");
+        }
 
+        // 标记失效等消息
+        $injuries = NbaInjuries::find([
+            "conditions" => "updatetime < ?1",
+            "bind"       => [
+                1 => $this->datatime,
+            ]
+        ]);
+        $injuries->update('isShow => 2');
+
+        $this->response->setJsonContent([
+            'status' => 'success',
+            'real_time_data' => $this->real_time_data,
+            'new_data' => $this->new_data,
+            'invalid_data' => count($injuries),
+            'time' => sprintf('%.4f', round(microtime(true) - $this->start_time, 4)),
+        ]);
         return $this->response;
     }
 
@@ -95,9 +100,10 @@ class CollectController extends BaseController
             }
             $this->new_data++;
         } else {
+            $injuries->isShow > 1 && $injuries->isShow = 1;
             $injuries->updatetime = $this->datatime;
         }
-        $this->sum_data++;
+        $this->real_time_data++;
         return $injuries->save();
 
     }
