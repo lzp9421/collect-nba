@@ -9,6 +9,15 @@ use Multiple\Frontend\Models\NbaPlayer;
 class CollectController extends BaseController
 {
     private $datatime;
+    private $new_data = 0;
+    private $sum_data = 0;
+    private $start_time;
+
+    public function initialize()
+    {
+        $this->start_time = microtime(true);
+        parent::initialize();
+    }
 
     public function indexAction($injuries)
     {
@@ -19,7 +28,12 @@ class CollectController extends BaseController
                 if (!$this->saveInjuries($data)) {
                     throw new \Exception('保存失败');
                 }
-                $this->response->setJsonContent(['status' => 'success']);
+                $this->response->setJsonContent([
+                    'status' => 'success',
+                    'sum_data' => $this->sum_data,
+                    'new_data' => $this->new_data,
+                    'time' => sprintf('%.4f', round(microtime(true) - $this->start_time, 4)),
+                ]);
             } catch (\Exception $e) {
                 $this->response->setJsonContent(['status' => 'error', 'data' => $e->getMessage()]);
             }
@@ -79,9 +93,11 @@ class CollectController extends BaseController
             foreach ($fields as $field) {
                 $injuries->$field = $player->$field;
             }
+            $this->new_data++;
         } else {
             $injuries->updatetime = $this->datatime;
         }
+        $this->sum_data++;
         return $injuries->save();
 
     }
