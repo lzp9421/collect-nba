@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <link rel="stylesheet" href="statics/bootstrap/bootstrap.css">
-    <link rel="stylesheet" href="statics/sweetalert/sweetalert.css">
+    <?= $this->tag->stylesheetLink('statics/bootstrap/bootstrap.css'); ?>
+    <?= $this->tag->stylesheetLink('statics/bootstrap/sweetalert.css'); ?>
     <title>Document</title>
     <style>
         p.help-block {
@@ -44,9 +44,9 @@
                         <tr class="info">
                             <th>球员</th>
                             <th>摘要</th>
-                            <th><a href="<?= '?date_order=' . intval(!(isset($_GET['date_order'])? $_GET['date_order'] : 0)) ?>">发布时间</a></th>
-                            <th><a href="<?= '?create_order=' . intval(!(isset($_GET['create_order'])? $_GET['create_order'] : 0)) ?>">采集时间</a></th>
-                            <th><a href="<?= '?show_order=' . intval(!(isset($_GET['show_order'])? $_GET['show_order'] : 0)) ?>">状态</a></th>
+                            <th><?= $this->tag->linkTo(['?date_order=' . intval(!(isset($_GET['date_order'])? $_GET['date_order'] : '0')), '发布时间']) ?></th>
+                            <th><?= $this->tag->linkTo(['?create_order=' . intval(!(isset($_GET['create_order'])? $_GET['create_order'] : '0')), '采集时间']) ?></th>
+                            <th><?= $this->tag->linkTo(['?show_order=' . intval(!(isset($_GET['show_order'])? $_GET['show_order'] : '0')), '状态']) ?></th>
                         </tr>
                         </thead>
                         <tbody>
@@ -180,9 +180,10 @@
     </div>
 </div>
 
-<script src="statics/jquery/jquery.min.js"></script>
-<script src="statics/bootstrap/bootstrap.min.js"></script>
-<script src="statics/sweetalert/sweetalert.min.js"></script>
+<?= $this->tag->javascriptInclude('statics/jquery/jquery.min.js');?>
+<?= $this->tag->javascriptInclude('statics/bootstrap/bootstrap.min.js');?>
+<?= $this->tag->javascriptInclude('statics/sweetalert/sweetalert.min.js');?>
+
 <script>
     $(function () {
 
