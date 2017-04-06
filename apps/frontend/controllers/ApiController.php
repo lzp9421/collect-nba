@@ -16,21 +16,21 @@ class ApiController extends BaseController
     {
         $team_name = (array)$this->request->get('team_name');
         if (empty($team_name)) {
-            $this->response->setJsonContent([]);
-            return $this->response;
-        }
-        $bind = [];
-        foreach ($team_name as $key => $name) {
-            $bind[$key + 1] = $name;
-        }
-        $in = array_map(function ($value) {
-            return '?' . $value;
-        }, array_keys($bind));
+            $query = null;
+        } else {
+            $bind = [];
+            foreach ($team_name as $key => $name) {
+                $bind[$key + 1] = $name;
+            }
+            $in = array_map(function ($value) {
+                return '?' . $value;
+            }, array_keys($bind));
 
-        $query = [
-            'conditions' => 'teamName IN (' . implode(', ', $in) . ')',
-            'bind'       => $bind,
-        ];
+            $query = [
+                'conditions' => 'teamName IN (' . implode(', ', $in) . ')',
+                'bind'       => $bind,
+            ];
+        }
         $injuries = NbaInjuries::find($query);
         $this->response->setJsonContent($injuries);
         return $this->response;
