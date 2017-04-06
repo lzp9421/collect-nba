@@ -44,9 +44,9 @@
                         <tr class="info">
                             <th>球员</th>
                             <th>摘要</th>
-                            <th>发布时间</th>
-                            <th>采集时间</th>
-                            <th>状态</th>
+                            <th><a href="<?= '?date_order=' . intval(!(isset($_GET['date_order'])? $_GET['date_order'] : 0)) ?>">发布时间</a></th>
+                            <th><a href="<?= '?create_order=' . intval(!(isset($_GET['create_order'])? $_GET['create_order'] : 0)) ?>">采集时间</a></th>
+                            <th><a href="<?= '?show_order=' . intval(!(isset($_GET['show_order'])? $_GET['show_order'] : 0)) ?>">状态</a></th>
                         </tr>
                         </thead>
                         <tbody>

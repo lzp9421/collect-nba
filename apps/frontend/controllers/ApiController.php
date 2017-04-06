@@ -11,6 +11,7 @@ class ApiController extends BaseController
     /**
      * 获取一条信息
      * @param int $id
+     * @return \Phalcon\Http\Response|\Phalcon\Http\ResponseInterface
      */
     public function showAction($id = 0)
     {
@@ -30,12 +31,13 @@ class ApiController extends BaseController
             'comment',
             'commentCn',
         ]));
-        $this->response->send();
+        return $this->response;
     }
 
     /**
      * 保存修改
      * @param $id
+     * @return \Phalcon\Http\Response|\Phalcon\Http\ResponseInterface
      */
     public function updateAction($id)
     {
@@ -65,7 +67,7 @@ class ApiController extends BaseController
         } else {
             $this->response->setJsonContent(['status' => 'error', 'data' => '不存在该条记录']);
         }
-        $this->response->send();
+        return $this->response;
     }
 
 }
