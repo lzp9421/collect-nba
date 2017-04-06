@@ -9,6 +9,33 @@ class ApiController extends BaseController
 {
 
     /**
+     * 数据查询接口
+     * @return \Phalcon\Http\Response|\Phalcon\Http\ResponseInterface
+     */
+    public function queryAction()
+    {
+        $team_name = (array)$this->request->get('team_name');
+        if (empty($team_name)) {
+            $this->response->setJsonContent([]);
+            return $this->response;
+        }
+        $bind = [];
+        foreach ($team_name as $key => $name) {
+            $bind[$key + 1] = $name;
+        }
+        $in = array_map(function ($value) {
+            return '?' . $value;
+        }, array_keys($bind));
+
+        $query = [
+            'conditions' => 'teamName IN (' . implode(', ', $in) . ')',
+            'bind'       => $bind,
+        ];
+        $injuries = NbaInjuries::find($query);
+        $this->response->setJsonContent($injuries);
+        return $this->response;
+    }
+    /**
      * 获取一条信息
      * @param int $id
      * @return \Phalcon\Http\Response|\Phalcon\Http\ResponseInterface
