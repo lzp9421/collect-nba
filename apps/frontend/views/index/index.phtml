@@ -32,32 +32,69 @@
 <body class="container-fluid">
 <div class="row">
     <div class="col-xs-12 col-md-6">
-        <table class="table table-hover table-striped" id="list">
-            <thead>
-            <tr class="info">
-                <th>球员</th>
-                <th>摘要</th>
-                <th>发布时间</th>
-                <th>采集时间</th>
-                <th>状态</th>
-            </tr>
-            </thead>
-            <tbody>
-            <?php
-            foreach ($injuries as $key => $item) {
-            ?>
-                <tr class="translate <?= $item->isShow ? (intval($item->isShow) === 1 ? 'active' : 'danger') : 'success' ?>" injuries-id="<?= $item->id ?>" style="cursor: pointer">
-                    <td><?= $item->displayName ?></td>
-                    <td class="comment_cn"><?= mb_strimwidth($item->comment,0,35,'...') ?></td>
-                    <td><?= (new \DateTime($item->date, new \DateTimeZone('UTC')))->format('m-d') ?></td>
-                    <td><?= (new \DateTime($item->createtime, new \DateTimeZone('UTC')))->setTimezone(new \DateTimeZone('PRC'))->format('m-d H:i') ?></td>
-                    <td class="comment_cn"><?= $item->isShow ? (intval($item->isShow) === 1 ? '未翻译' : '已失效') : '已翻译' ?></td>
-                </tr>
-            <?php
-            }
-            ?>
-            </tbody>
-        </table>
+
+            <ul id="myTabs" class="nav nav-tabs" role="tablist">
+                <li role="presentation" class="active"><a href="#injuries" id="injuries-tab" role="tab" data-toggle="tab" aria-controls="injuries" aria-expanded="false">实时消息</a></li>
+                <li role="presentation" class=""><a href="#invalid" role="tab" id="invalid-tab" data-toggle="tab" aria-controls="invalid" aria-expanded="true">已失效</a></li>
+            </ul>
+            <div id="myTabContent" class="tab-content">
+                <div role="tabpanel" class="tab-pane fade active in" id="injuries" aria-labelledby="injuries-tab">
+                    <table class="table table-hover table-striped" id="list">
+                        <thead>
+                        <tr class="info">
+                            <th>球员</th>
+                            <th>摘要</th>
+                            <th>发布时间</th>
+                            <th>采集时间</th>
+                            <th>状态</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <?php
+                        foreach ($injuries as $key => $item) {
+                            ?>
+                            <tr class="translate <?= $item->isShow ? 'active' : 'success' ?>" injuries-id="<?= $item->id ?>" style="cursor: pointer">
+                                <td><?= $item->displayName ?></td>
+                                <td class="comment_cn"><?= mb_strimwidth($item->comment,0,35,'...') ?></td>
+                                <td><?= (new \DateTime($item->date, new \DateTimeZone('UTC')))->format('m-d') ?></td>
+                                <td><?= (new \DateTime($item->createtime, new \DateTimeZone('UTC')))->setTimezone(new \DateTimeZone('PRC'))->format('m-d H:i') ?></td>
+                                <td class="comment_cn"><?= $item->isShow ? '未翻译' : '已翻译' ?></td>
+                            </tr>
+                            <?php
+                        }
+                        ?>
+                        </tbody>
+                    </table>
+                </div>
+                <div role="tabpanel" class="tab-pane fade" id="invalid" aria-labelledby="invalid-tab">
+
+                    <table class="table table-hover table-striped" id="list">
+                        <thead>
+                        <tr class="info">
+                            <th>球员</th>
+                            <th>摘要</th>
+                            <th>发布时间</th>
+                            <th>采集时间</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <?php
+                        foreach ($invalid as $key => $item) {
+                            ?>
+                            <tr class="translate danger" injuries-id="<?= $item->id ?>" style="cursor: pointer">
+                                <td><?= $item->displayName ?></td>
+                                <td class="comment_cn"><?= mb_strimwidth($item->comment,0,35,'...') ?></td>
+                                <td><?= (new \DateTime($item->date, new \DateTimeZone('UTC')))->format('m-d') ?></td>
+                                <td><?= (new \DateTime($item->createtime, new \DateTimeZone('UTC')))->setTimezone(new \DateTimeZone('PRC'))->format('m-d H:i') ?></td>
+                            </tr>
+                            <?php
+                        }
+                        ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
     </div>
     <div class="col-xs-12 col-md-6">
 
@@ -144,6 +181,7 @@
 </div>
 
 <script src="statics/jquery/jquery.min.js"></script>
+<script src="statics/bootstrap/bootstrap.min.js"></script>
 <script src="statics/sweetalert/sweetalert.min.js"></script>
 <script>
     $(function () {
@@ -226,6 +264,11 @@
             }, $(this).attr('injuries-id'));
         });
 
+    });
+
+    $('#myTabs a').click(function (e) {
+        e.preventDefault();
+        $(this).tab('show');
     });
 </script>
 </body>

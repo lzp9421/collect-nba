@@ -88,6 +88,7 @@ class CollectController extends BaseController
             }
             $injuries->displayNameEn = $display_name_en;
             $injuries->status = $status;
+            $injuries->statusCn = strcasecmp($status, 'out') ? '无法上场' : (strcasecmp($status, 'day-to-day') ? '伤病进展' : '其他');
             $injuries->date = $date;
             $injuries->dateCn = (new \DateTime($data['3'], new \DateTimeZone('UTC')))->format('m月d日');
             $injuries->comment = $comment;
