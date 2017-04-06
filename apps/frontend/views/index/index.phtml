@@ -34,8 +34,8 @@
     <div class="col-xs-12 col-md-6">
 
             <ul id="myTabs" class="nav nav-tabs" role="tablist">
-                <li role="presentation" class="active"><a href="#injuries" id="injuries-tab" role="tab" data-toggle="tab" aria-controls="injuries" aria-expanded="false">实时消息</a></li>
-                <li role="presentation" class=""><a href="#invalid" role="tab" id="invalid-tab" data-toggle="tab" aria-controls="invalid" aria-expanded="true">已失效</a></li>
+                <li role="presentation" class="active"><a href="#injuries" id="injuries-tab" role="tab" data-toggle="tab" aria-controls="injuries" aria-expanded="false">实时消息 <span class="badge"><?= count($injuries) ?></span></a></li>
+                <li role="presentation" class=""><a href="#invalid" role="tab" id="invalid-tab" data-toggle="tab" aria-controls="invalid" aria-expanded="true">已失效 <span class="badge"><?= count($invalid) ?></span></a></li>
             </ul>
             <div id="myTabContent" class="tab-content">
                 <div role="tabpanel" class="tab-pane fade active in" id="injuries" aria-labelledby="injuries-tab">

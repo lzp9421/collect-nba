@@ -20,9 +20,9 @@ class CollectController extends BaseController
         parent::initialize();
     }
 
-    public function indexAction($injuries)
+    public function indexAction()
     {
-        $this->datatime = date('Y-m-d H:i:s');
+        $this->datatime = (new \DateTime('now', new \DateTimeZone('UTC')))->format('Y-m-d H:i:s');
         $html = $this->getHtml('http://www.espn.com/nba/injuries');
         foreach($this->parseHtml($html) as $data) {
             if (!$this->saveInjuries($data)) {
@@ -37,7 +37,7 @@ class CollectController extends BaseController
                 1 => $this->datatime,
             ]
         ]);
-        $injuries->update('isShow => 2');
+        $injuries->update(['isShow' => 2]);
 
         $this->response->setJsonContent([
             'status' => 'success',
