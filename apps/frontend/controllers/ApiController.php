@@ -16,7 +16,9 @@ class ApiController extends BaseController
     {
         $team_name = (array)$this->request->get('team_name');
         if (empty($team_name)) {
-            $query = null;
+            $query = [
+                'conditions' => 'id IN (select min(id) from Multiple\Frontend\Models\NbaInjuries where isShow IN(0, 1) GROUP BY teamName, displayNameEn, commentCn)',
+            ];
         } else {
             $bind = [];
             foreach ($team_name as $key => $name) {
@@ -25,9 +27,8 @@ class ApiController extends BaseController
             $in = array_map(function ($value) {
                 return '?' . $value;
             }, array_keys($bind));
-
             $query = [
-                'conditions' => 'teamName IN (' . implode(', ', $in) . ')',
+                'conditions' => 'id IN (select min(id) from Multiple\Frontend\Models\NbaInjuries where isShow IN(0, 1)  AND teamName IN (' . implode(', ', $in) . ') GROUP BY teamName, displayNameEn, commentCn)',
                 'bind'       => $bind,
             ];
         }
