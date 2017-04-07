@@ -9,7 +9,7 @@
 #### 采集接口
 
 ```
-http://your_apath//collect
+http://your_path//collect
 ```
 
 **返回信息：**
@@ -35,7 +35,7 @@ http://your_apath//collect
 
 ```
 # 查询一个球队
-http://your_apath/api/query?team_name=篮网
+http://your_path/api/query?team_name=篮网
 # 查询多个球队
-http://your_apath/api/query?team_name[]=篮网&team_name[]=老鹰&……
+http://your_path/api/query?team_name[]=篮网&team_name[]=老鹰&……
 ```
