@@ -58,7 +58,7 @@
                             ?>
                             <tr class="translate <?= $item->isShow ? 'active' : 'success' ?>" injuries-id="<?= $item->id ?>" style="cursor: pointer">
                                 <td><?= $item->displayName ?></td>
-                                <td><?= $item->statusCn ?></td>
+                                <td class="status_cn"><?= $item->statusCn ?></td>
                                 <td class="<?= $item->commentCn ? 'comment_cn' : 'comment' ?>" title="<?= $item->commentCn ?: $item->comment ?>"><?= mb_strimwidth($item->commentCn ?: $item->comment,0,35,'...') ?></td>
                                 <td><?= (new \DateTime($item->date, new \DateTimeZone('UTC')))->format('m-d') ?></td>
                                 <td><?= (new \DateTime($item->createtime, new \DateTimeZone('UTC')))->setTimezone(new \DateTimeZone('PRC'))->format('m-d H:i') ?></td>
@@ -88,7 +88,7 @@
                             ?>
                             <tr class="translate danger" injuries-id="<?= $item->id ?>" style="cursor: pointer">
                                 <td><?= $item->displayName ?></td>
-                                <td><?= $item->statusCn ?></td>
+                                <td class="status_cn"><?= $item->statusCn ?></td>
                                 <td class="<?= $item->commentCn ? 'comment_cn' : 'comment' ?>"><?= mb_strimwidth($item->commentCn ?: $item->comment,0,35,'...') ?></td>
                                 <td><?= (new \DateTime($item->date, new \DateTimeZone('UTC')))->format('m-d') ?></td>
                                 <td><?= (new \DateTime($item->createtime, new \DateTimeZone('UTC')))->setTimezone(new \DateTimeZone('PRC'))->format('m-d H:i') ?></td>
@@ -149,10 +149,8 @@
                                 <label for="statusCn" class="form-control-static">状态</label>
                             </div>
                             <div class="col-md-10">
-                                <p class="well well-sm">
-                                    <span id="statusCn"></span>
-                                    (<span id="status" class="text-muted"></span>)
-                                </p>
+                                <input type="text" name="statusCn" id="statusCn" placeholder="状态" class="form-control">
+                                <p id="status" class="help-block">　</p>
                             </div>
                         </div>
                         <hr>
@@ -206,7 +204,7 @@
             }, "json");
         };
 
-        var setTableSuccess = function (id, comment_cn) {
+        var setTableSuccess = function (id, comment_cn, status_cn) {
             var tr = $(".translate[injuries-id='" + id + "']");
             if (!tr.hasClass('danger')) {
                 tr.removeClass('active');
@@ -214,7 +212,9 @@
             }
             var td = tr.find('.isshow');
             td.text('已翻译');
-            var td = tr.find('.comment');
+            var td = tr.find('.status_cn');
+            td.text(status_cn);
+            var td = tr.find('.comment, .comment_cn');
             td.attr('title', comment_cn);
             if (comment_cn.length > 20) {
                 comment_cn = comment_cn.substr(0, 20) + '...';
@@ -230,18 +230,14 @@
         $('#update').on('click', function () {
             $('#update').attr("disabled", "true");
             var id = $('#id').val();
-            var display_name = $('#displayName').val();
             var status_cn = $('#statusCn').val();
-            var date_cn = $('#dateCn').val();
             var comment_cn = $('#commentCn').val();
             $.post('api/update/' + id, {
-                displayName: display_name,
                 statusCn: status_cn,
-                dateCn: date_cn,
                 commentCn: comment_cn
             }, function (data) {
                 if (data.status === 'success') {
-                    setTableSuccess(id, comment_cn);
+                    setTableSuccess(id, comment_cn, status_cn);
                     sweetAlert({
                         type: "success",
                         title: "提交成功!",
