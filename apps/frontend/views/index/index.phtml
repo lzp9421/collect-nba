@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <?= $this->tag->stylesheetLink('statics/bootstrap/bootstrap.css'); ?>
-    <?= $this->tag->stylesheetLink('statics/bootstrap/sweetalert.css'); ?>
+    <?= $this->tag->stylesheetLink('statics/sweetalert/sweetalert.css'); ?>
     <title>Document</title>
     <style>
         p.help-block {
@@ -33,7 +33,7 @@
 <div class="row">
     <div class="col-xs-12 col-md-6">
 
-            <ul id="myTabs" class="nav nav-tabs" role="tablist">
+            <ul id="msg-tabs" class="nav nav-tabs" role="tablist">
                 <li role="presentation" class="active"><a href="#injuries" id="injuries-tab" role="tab" data-toggle="tab" aria-controls="injuries" aria-expanded="false">实时消息 <span class="badge"><?= count($injuries) ?></span></a></li>
                 <li role="presentation" class=""><a href="#invalid" role="tab" id="invalid-tab" data-toggle="tab" aria-controls="invalid" aria-expanded="true">已失效 <span class="badge"><?= count($invalid) ?></span></a></li>
             </ul>
@@ -58,7 +58,7 @@
                                 <td class="comment_cn"><?= mb_strimwidth($item->comment,0,35,'...') ?></td>
                                 <td><?= (new \DateTime($item->date, new \DateTimeZone('UTC')))->format('m-d') ?></td>
                                 <td><?= (new \DateTime($item->createtime, new \DateTimeZone('UTC')))->setTimezone(new \DateTimeZone('PRC'))->format('m-d H:i') ?></td>
-                                <td class="comment_cn"><?= $item->isShow ? '未翻译' : '已翻译' ?></td>
+                                <td class="isshow"><?= $item->isShow ? '未翻译' : '已翻译' ?></td>
                             </tr>
                             <?php
                         }
@@ -204,8 +204,8 @@
                 tr.removeClass('active');
                 tr.addClass('success');
             }
-            var td = tr.find('.comment_cn');
-            td.text(comment_cn);
+            var td = tr.find('.isshow');
+            td.text('已翻译');
         };
 
         show(function (obj, value) {
@@ -265,11 +265,10 @@
             }, $(this).attr('injuries-id'));
         });
 
-    });
-
-    $('#myTabs a').click(function (e) {
-        e.preventDefault();
-        $(this).tab('show');
+        $('#msg-tabs a').click(function (e) {
+            e.preventDefault();
+            $(this).tab('show');
+        });
     });
 </script>
 </body>
