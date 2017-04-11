@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <?= $this->tag->stylesheetLink('statics/bootstrap/bootstrap.css'); ?>
     <?= $this->tag->stylesheetLink('statics/sweetalert/sweetalert.css'); ?>
-    <title>Document</title>
+    <title>翻译</title>
     <style>
         p.help-block {
             padding-top: 8px;
@@ -15,9 +15,9 @@
         .form-group {
             max-width: 960px;
         }
-        div.col-md-6 {
+        div.col-md-8 {
             height: 800px;
-            overflow: scroll;
+            overflow-y: scroll;
         }
         #list .selected {
             box-sizing: border-box;
@@ -27,22 +27,25 @@
         .danger td {
             text-decoration: line-through;
         }
+        body>row {
+            position: relative;
+        }
     </style>
 </head>
 <body class="container-fluid">
+<ul id="msg-tabs" class="nav nav-tabs" role="tablist">
+    <li role="presentation" class="active"><a href="#injuries" id="injuries-tab" role="tab" data-toggle="tab" aria-controls="injuries" aria-expanded="false">实时消息 <span class="badge"><?= count($injuries) ?></span></a></li>
+    <li role="presentation" class=""><a href="#invalid" role="tab" id="invalid-tab" data-toggle="tab" aria-controls="invalid" aria-expanded="true">已失效 <span class="badge"><?= count($invalid) ?></span></a></li>
+</ul>
 <div class="row">
-    <div class="col-xs-12 col-md-6">
-
-            <ul id="msg-tabs" class="nav nav-tabs" role="tablist">
-                <li role="presentation" class="active"><a href="#injuries" id="injuries-tab" role="tab" data-toggle="tab" aria-controls="injuries" aria-expanded="false">实时消息 <span class="badge"><?= count($injuries) ?></span></a></li>
-                <li role="presentation" class=""><a href="#invalid" role="tab" id="invalid-tab" data-toggle="tab" aria-controls="invalid" aria-expanded="true">已失效 <span class="badge"><?= count($invalid) ?></span></a></li>
-            </ul>
+    <div class="col-xs-12 col-md-8">
             <div id="myTabContent" class="tab-content">
                 <div role="tabpanel" class="tab-pane fade active in" id="injuries" aria-labelledby="injuries-tab">
                     <table class="table table-hover table-striped" id="list">
                         <thead>
                         <tr class="info">
                             <th>球员</th>
+                            <th>状态</th>
                             <th>摘要</th>
                             <th><?= $this->tag->linkTo(['?date_order=' . intval(!(isset($_GET['date_order'])? $_GET['date_order'] : '0')), '发布时间']) ?></th>
                             <th><?= $this->tag->linkTo(['?create_order=' . intval(!(isset($_GET['create_order'])? $_GET['create_order'] : '0')), '采集时间']) ?></th>
@@ -55,7 +58,8 @@
                             ?>
                             <tr class="translate <?= $item->isShow ? 'active' : 'success' ?>" injuries-id="<?= $item->id ?>" style="cursor: pointer">
                                 <td><?= $item->displayName ?></td>
-                                <td class="comment_cn"><?= mb_strimwidth($item->comment,0,35,'...') ?></td>
+                                <td><?= $item->statusCn ?></td>
+                                <td class="<?= $item->commentCn ? 'comment_cn' : 'comment' ?>" title="<?= $item->commentCn ?: $item->comment ?>"><?= mb_strimwidth($item->commentCn ?: $item->comment,0,35,'...') ?></td>
                                 <td><?= (new \DateTime($item->date, new \DateTimeZone('UTC')))->format('m-d') ?></td>
                                 <td><?= (new \DateTime($item->createtime, new \DateTimeZone('UTC')))->setTimezone(new \DateTimeZone('PRC'))->format('m-d H:i') ?></td>
                                 <td class="isshow"><?= $item->isShow ? '未翻译' : '已翻译' ?></td>
@@ -72,6 +76,7 @@
                         <thead>
                         <tr class="info">
                             <th>球员</th>
+                            <th>状态</th>
                             <th>摘要</th>
                             <th>发布时间</th>
                             <th>采集时间</th>
@@ -83,7 +88,8 @@
                             ?>
                             <tr class="translate danger" injuries-id="<?= $item->id ?>" style="cursor: pointer">
                                 <td><?= $item->displayName ?></td>
-                                <td class="comment_cn"><?= mb_strimwidth($item->comment,0,35,'...') ?></td>
+                                <td><?= $item->statusCn ?></td>
+                                <td class="<?= $item->commentCn ? 'comment_cn' : 'comment' ?>"><?= mb_strimwidth($item->commentCn ?: $item->comment,0,35,'...') ?></td>
                                 <td><?= (new \DateTime($item->date, new \DateTimeZone('UTC')))->format('m-d') ?></td>
                                 <td><?= (new \DateTime($item->createtime, new \DateTimeZone('UTC')))->setTimezone(new \DateTimeZone('PRC'))->format('m-d H:i') ?></td>
                             </tr>
@@ -96,7 +102,7 @@
             </div>
 
     </div>
-    <div class="col-xs-12 col-md-6">
+    <div class="col-xs-12 col-md-4">
 
         <div class="panel panel-info">
             <div class="panel-heading">
@@ -143,8 +149,10 @@
                                 <label for="statusCn" class="form-control-static">状态</label>
                             </div>
                             <div class="col-md-10">
-                                <input type="text" name="statusCn" id="statusCn" placeholder="状态" class="form-control">
-                                <p id="status" class="help-block">　</p>
+                                <p class="well well-sm">
+                                    <span id="statusCn"></span>
+                                    (<span id="status" class="text-muted"></span>)
+                                </p>
                             </div>
                         </div>
                         <hr>
@@ -206,6 +214,12 @@
             }
             var td = tr.find('.isshow');
             td.text('已翻译');
+            var td = tr.find('.comment');
+            td.attr('title', comment_cn);
+            if (comment_cn.length > 20) {
+                comment_cn = comment_cn.substr(0, 20) + '...';
+            }
+            td.text(comment_cn);
         };
 
         show(function (obj, value) {
