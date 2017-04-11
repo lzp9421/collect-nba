@@ -24,7 +24,11 @@ class CollectController extends BaseController
     {
         $this->datatime = (new \DateTime('now', new \DateTimeZone('UTC')))->format('Y-m-d H:i:s');
         $html = $this->getHtml('http://www.espn.com/nba/injuries');
-        foreach($this->parseHtml($html) as $data) {
+        $list = $this->parseHtml($html);
+        if (empty($list)) {
+            throw new \Exception('采集失败');
+        }
+        foreach($list as $data) {
             if (!$this->saveInjuries($data)) {
                 throw new \Exception('保存失败');
             }
