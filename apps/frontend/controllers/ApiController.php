@@ -86,7 +86,7 @@ class ApiController extends BaseController
                 $injuries->$field = $value;
             }
             if (empty($errors)) {
-                $injuries->isShow = 0;
+                $injuries->isShow == '1' && $injuries->isShow = 0;
                 $injuries->save();
                 $this->response->setJsonContent(['status' => 'success', 'data' => '']);
             } else {
