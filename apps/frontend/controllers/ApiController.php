@@ -17,7 +17,9 @@ class ApiController extends BaseController
         $team_name = (array)$this->request->get('team_name');
         if (empty($team_name)) {
             $query = [
-                'conditions' => 'id IN (select min(id) from Multiple\Frontend\Models\NbaInjuries where isShow IN(0, 1) GROUP BY teamName, displayNameEn, commentCn)',
+                'conditions' => 'isShow IN(0, 1)',
+                'columns' => 'group_concat(id, \':\', dateCn) AS ids',
+                'group' => 'teamName, displayNameEn, commentCn',
             ];
         } else {
             $bind = [];
@@ -28,14 +30,39 @@ class ApiController extends BaseController
                 return '?' . $value;
             }, array_keys($bind));
             $query = [
-                'conditions' => 'id IN (select min(id) from Multiple\Frontend\Models\NbaInjuries where isShow IN(0, 1)  AND teamName IN (' . implode(', ', $in) . ') GROUP BY teamName, displayNameEn, commentCn)',
+                'conditions' => 'isShow IN(0, 1)  AND teamName IN (' . implode(', ', $in) . ')',
                 'bind'       => $bind,
+                'columns' => 'group_concat(id, \':\', dateCn) AS ids',
+                'group' => 'teamName, displayNameEn, commentCn',
             ];
         }
-        $injuries = NbaInjuries::find($query);
+        $in = array_map(function ($data) {
+            return $this->getTimelyId($data['ids']);
+        }, NbaInjuries::find($query)->toArray());
+        $injuries = NbaInjuries::find([
+            'conditions' => 'id IN (' . implode(', ', $in) . ')',
+        ]);
+
         $this->response->setJsonContent($injuries);
         return $this->response;
     }
+
+    // 获取最新的id
+    private function getTimelyId($data)
+    {
+        // "1384:04月01日,1385:04月11日"
+        $id = 0;
+        $time = '';
+        foreach (explode(',', $data) as $_data) {
+            list($_id, $_time) = explode(':', $_data);
+            if ($_time > $time) {
+                $time = $_time;
+                $id = $_id;
+            }
+        }
+        return $id;
+    }
+
     /**
      * 获取一条信息
      * @param int $id
