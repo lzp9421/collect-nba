@@ -210,10 +210,8 @@
                 tr.removeClass('active');
                 tr.addClass('success');
             }
-            var td = tr.find('.isshow');
-            td.text('已翻译');
-            var td = tr.find('.status_cn');
-            td.text(status_cn);
+            tr.find('.isshow').text('已翻译');
+            tr.find('.status_cn').text(status_cn);
             var td = tr.find('.comment, .comment_cn');
             td.attr('title', comment_cn);
             if (comment_cn.length > 20) {

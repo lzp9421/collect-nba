@@ -13,6 +13,7 @@ class CollectController extends BaseController
     private $new_data = 0;
     private $real_time_data = 0;
     private $start_time;
+    private $bad = []; // 没有对应信息的球员
 
     public function initialize()
     {
@@ -24,14 +25,18 @@ class CollectController extends BaseController
     {
         $this->datatime = (new \DateTime('now', new \DateTimeZone('UTC')))->format('Y-m-d H:i:s');
         $html = $this->getHtml('http://www.espn.com/nba/injuries');
-        $list = $this->parseHtml($html);
-        if (empty($list)) {
-            throw new \Exception('采集失败');
-        }
-        foreach($list as $data) {
-            if (!$this->saveInjuries($data)) {
-                throw new \Exception('保存失败');
+        try {
+            $list = $this->parseHtml($html);
+            if (empty($list)) {
+                throw new \Exception('采集失败');
             }
+            foreach($list as $data) {
+                if (!$this->saveInjuries($data)) {
+                    throw new \Exception('保存失败');
+                }
+            }
+        } catch (\Exception $e) {
+            return $this->response->setJsonContent(['status' => 'error', 'data' => $e->getMessage()]);
         }
 
         // 标记失效等消息
@@ -43,14 +48,14 @@ class CollectController extends BaseController
         ]);
         $injuries->update(['isShow' => 2]);
 
-        $this->response->setJsonContent([
+        return $this->response->setJsonContent([
             'status' => 'success',
             'real_time_data' => $this->real_time_data,
             'new_data' => $this->new_data,
             'invalid_data' => count($injuries),
+            'error' => $this->bad,
             'time' => sprintf('%.4f', round(microtime(true) - $this->start_time, 4)),
         ]);
-        return $this->response;
     }
 
     /**
@@ -88,7 +93,9 @@ class CollectController extends BaseController
             ]);
 
             if (empty($player)) {
-                throw new \Exception();
+                $this->bad[] = $display_name_en;
+                return -1;
+                //throw new \Exception('找不到该球员等信息');
             }
             $injuries->displayNameEn = $display_name_en;
             $injuries->status = $status;
