@@ -15,33 +15,41 @@ class ApiController extends BaseController
     public function queryAction()
     {
         $team_name = (array)$this->request->get('team_name');
+
+        // 查询该球队按球员分组，分组中评论全为空的数据
         if (empty($team_name)) {
-            $query = [
-                'conditions' => 'isShow IN(0, 1)',
-                'columns' => 'group_concat(id, \':\', dateCn) AS ids',
-                'group' => 'teamName, displayNameEn, commentCn',
-            ];
+            $query['conditions'] = 'isShow IN(0, 1)';
         } else {
-            $bind = [];
-            foreach ($team_name as $key => $name) {
-                $bind[$key + 1] = $name;
-            }
-            $in = array_map(function ($value) {
-                return '?' . $value;
-            }, array_keys($bind));
-            $query = [
-                'conditions' => 'isShow IN(0, 1)  AND teamName IN (' . implode(', ', $in) . ')',
-                'bind'       => $bind,
-                'columns' => 'group_concat(id, \':\', dateCn) AS ids',
-                'group' => 'teamName, displayNameEn, commentCn',
+            $query['conditions'] = 'isShow IN(0, 1) AND teamName IN ({team_name:array})';
+            $query['bind'] = [
+                'team_name' => $team_name,
             ];
         }
+        $query['columns'] = 'group_concat(id, \':\', dateCn) AS ids';
+        $query['group'] = 'teamName, displayNameEn';
+        $query['having'] = 'min(isShow) = 1 AND max(isShow) = 1';
+        // 获取最新的一条的id
         $in = array_map(function ($data) {
             return $this->getTimelyId($data['ids']);
         }, NbaInjuries::find($query)->toArray());
-        $injuries = NbaInjuries::find([
-            'conditions' => 'id IN (' . implode(', ', $in) . ')',
-        ]);
+        $injuries = $in ? NbaInjuries::find([
+            'conditions' => 'id IN ({in:array})',
+            'bind' => [
+                'in' => $in,
+            ],
+        ])->toArray() : [];
+        // 查询该球队所有有翻译到评论
+        $query = [];
+        if (empty($team_name)) {
+            $query['conditions'] = 'isShow = 0';
+        } else {
+            $query['conditions'] = 'isShow = 0 AND teamName IN ({team_name:array})';
+            $query['bind'] = [
+                'team_name' => $team_name,
+            ];
+        }
+        // 合并结果集
+        $injuries = array_merge($injuries, NbaInjuries::find($query)->toArray());
 
         $this->response->setJsonContent($injuries);
         return $this->response;
