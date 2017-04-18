@@ -133,4 +133,24 @@ class ApiController extends BaseController
         return $this->response;
     }
 
+    /**
+     * 重置一条消息为未翻译状态
+     * @param $id
+     * @return \Phalcon\Http\Response|\Phalcon\Http\ResponseInterface
+     */
+    public function resetAction($id)
+    {
+        $injuries = NbaInjuries::findFirst([
+            "conditions" => "id = ?1",
+            "bind"       => [
+                1 => $id,
+            ]
+        ]);
+        $injuries->isShow == '0' && $injuries->isShow = 1;
+        if (!$injuries->save()) {
+            return $this->response->setJsonContent(['status' => 'error', 'data' => $injuries->getMessages()]);
+        }
+        return $this->response->setJsonContent(['status' => 'success', 'data' => '']);
+    }
+
 }
