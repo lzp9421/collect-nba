@@ -17,4 +17,10 @@ class NbaInjuries extends Model
             ]
         );
     }
+
+    public function isNew()
+    {
+        date_default_timezone_set("PRC");
+        return $this->commentCn == null && time() - strtotime($this->createtime) < 24 * 3600 ? true : false;
+    }
 }

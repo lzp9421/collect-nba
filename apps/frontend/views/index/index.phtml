@@ -69,7 +69,7 @@
                             <td class="injury"><?= $item->injury ?></td>
                             <td><?= (new \DateTime($item->date, new \DateTimeZone('UTC')))->format('m-d') ?></td>
                             <td><?= (new \DateTime($item->createtime, new \DateTimeZone('UTC')))->setTimezone(new \DateTimeZone('PRC'))->format('m-d H:i') ?></td>
-                            <td class="isshow"><?= $item->isShow ? '未翻译' : '已翻译' ?></td>
+                            <td class="isshow"><?= $item->isShow ? '未翻译' : '已翻译' ?><?= $item->isNew() ? '<span class="badge" style="background: #ff3d00">new</span>' : '' ?></td>
                         </tr>
                         <?php
                     }
@@ -233,6 +233,7 @@
             tr.find('.isshow').text('已翻译');
             tr.find('.status_cn').text(status_cn);
             tr.find('.injury').text(injury);
+            tr.find('.badge').remove();
             var td = tr.find('.comment, .comment_cn');
             td.attr('title', comment_cn);
             if (comment_cn.length > 20) {
