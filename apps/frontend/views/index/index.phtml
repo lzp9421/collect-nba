@@ -27,8 +27,13 @@
         .danger td {
             text-decoration: line-through;
         }
-        body>row {
+        body>.row {
             position: relative;
+        }
+        .translate .team {
+            background-repeat: no-repeat;
+            background-size: 36px;
+            background-position: 80% 50%;
         }
     </style>
 </head>
@@ -57,7 +62,7 @@
                         foreach ($injuries as $key => $item) {
                             ?>
                             <tr class="translate <?= $item->isShow ? 'active' : 'success' ?>" injuries-id="<?= $item->id ?>" style="cursor: pointer">
-                                <td><?= $item->displayName ?></td>
+                                <td class = "team" style="background-image: url('<?= $item->team->logo ?>')"><?= $item->displayName ?></td>
                                 <td class="status_cn"><?= $item->statusCn ?></td>
                                 <td class="<?= $item->commentCn ? 'comment_cn' : 'comment' ?>" title="<?= $item->commentCn ?: $item->comment ?>"><?= mb_strimwidth($item->commentCn ?: $item->comment,0,35,'...') ?></td>
                                 <td><?= (new \DateTime($item->date, new \DateTimeZone('UTC')))->format('m-d') ?></td>
