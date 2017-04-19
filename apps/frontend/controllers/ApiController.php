@@ -91,6 +91,7 @@ class ApiController extends BaseController
             'statusCn',
             'date',
             'dateCn',
+            'injury',
             'comment',
             'commentCn',
         ]));
@@ -114,7 +115,7 @@ class ApiController extends BaseController
         if ($injuries) {
             // 保存操作
             $errors = [];
-            $fields = ['statusCn', 'commentCn'];
+            $fields = ['statusCn', 'injury', 'commentCn'];
             foreach ($fields as $field) {
                 $value = trim(htmlspecialchars($this->request->get($field)));
                 empty($value) && $errors[] = "请填写${field}字段";

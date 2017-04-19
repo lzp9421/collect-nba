@@ -102,6 +102,7 @@ class CollectController extends BaseController
             $injuries->statusCn = !strcasecmp($status, 'out') ? '无法上场' : (!strcasecmp($status, 'day-to-day') ? '伤病进展' : '其他');
             $injuries->date = $date;
             $injuries->dateCn = (new \DateTime($data['3'], new \DateTimeZone('UTC')))->format('m月d日');
+            $injuries->injury = $this->lastInjury($display_name_en);
             $injuries->comment = $comment;
             $injuries->updatetime = $injuries->createtime = $this->datatime;
             $injuries->isShow = 1;
@@ -118,6 +119,24 @@ class CollectController extends BaseController
         $this->real_time_data++;
         return $injuries->save();
 
+    }
+
+    /**
+     * 最新伤停部位
+     * @param $display_name_en
+     * @return null|\Phalcon\Mvc\Model\Resultset
+     */
+    private function lastInjury($display_name_en)
+    {
+        $injuries = NbaInjuries::findFirst([
+            'conditions' => 'displayNameEn = ?1 AND injury IS NOT NULL',
+            'bind' => [
+                1 => $display_name_en,
+            ],
+            'order' => 'dateCn DESC',
+        ]);
+
+        return $injuries ? $injuries->injury : null;
     }
 
     /**

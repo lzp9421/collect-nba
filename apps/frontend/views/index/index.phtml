@@ -44,68 +44,71 @@
 </ul>
 <div class="row">
     <div class="col-xs-12 col-md-8">
-            <div id="myTabContent" class="tab-content">
-                <div role="tabpanel" class="tab-pane fade active in" id="injuries" aria-labelledby="injuries-tab">
-                    <table class="table table-hover table-striped" id="list">
-                        <thead>
-                        <tr class="info">
-                            <th>球员</th>
-                            <th>状态</th>
-                            <th>摘要</th>
-                            <th><?= $this->tag->linkTo(['?date_order=' . intval(!(isset($_GET['date_order'])? $_GET['date_order'] : '0')), '发布时间']) ?></th>
-                            <th><?= $this->tag->linkTo(['?create_order=' . intval(!(isset($_GET['create_order'])? $_GET['create_order'] : '0')), '采集时间']) ?></th>
-                            <th><?= $this->tag->linkTo(['?show_order=' . intval(!(isset($_GET['show_order'])? $_GET['show_order'] : '0')), '状态']) ?></th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <?php
-                        foreach ($injuries as $key => $item) {
-                            ?>
-                            <tr class="translate <?= $item->isShow ? 'active' : 'success' ?>" injuries-id="<?= $item->id ?>" style="cursor: pointer">
-                                <td class = "team" style="background-image: url('<?= $item->team->logo ?>')"><?= $item->displayName ?></td>
-                                <td class="status_cn"><?= $item->statusCn ?></td>
-                                <td class="<?= $item->commentCn ? 'comment_cn' : 'comment' ?>" title="<?= $item->commentCn ?: $item->comment ?>"><?= mb_strimwidth($item->commentCn ?: $item->comment,0,35,'...') ?></td>
-                                <td><?= (new \DateTime($item->date, new \DateTimeZone('UTC')))->format('m-d') ?></td>
-                                <td><?= (new \DateTime($item->createtime, new \DateTimeZone('UTC')))->setTimezone(new \DateTimeZone('PRC'))->format('m-d H:i') ?></td>
-                                <td class="isshow"><?= $item->isShow ? '未翻译' : '已翻译' ?></td>
-                            </tr>
-                            <?php
-                        }
+        <div id="myTabContent" class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="injuries" aria-labelledby="injuries-tab">
+                <table class="table table-hover table-striped" id="list">
+                    <thead>
+                    <tr class="info">
+                        <th>球员</th>
+                        <th>状态</th>
+                        <th>摘要</th>
+                        <th>伤停</th>
+                        <th><?= $this->tag->linkTo(['?date_order=' . intval(!(isset($_GET['date_order'])? $_GET['date_order'] : '0')), '发布时间']) ?></th>
+                        <th><?= $this->tag->linkTo(['?create_order=' . intval(!(isset($_GET['create_order'])? $_GET['create_order'] : '0')), '采集时间']) ?></th>
+                        <th><?= $this->tag->linkTo(['?show_order=' . intval(!(isset($_GET['show_order'])? $_GET['show_order'] : '0')), '状态']) ?></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <?php
+                    foreach ($injuries as $key => $item) {
                         ?>
-                        </tbody>
-                    </table>
-                </div>
-                <div role="tabpanel" class="tab-pane fade" id="invalid" aria-labelledby="invalid-tab">
-
-                    <table class="table table-hover table-striped" id="list">
-                        <thead>
-                        <tr class="info">
-                            <th>球员</th>
-                            <th>状态</th>
-                            <th>摘要</th>
-                            <th>发布时间</th>
-                            <th>采集时间</th>
+                        <tr class="translate <?= $item->isShow ? 'active' : 'success' ?>" injuries-id="<?= $item->id ?>" style="cursor: pointer">
+                            <td class = "team" style="background-image: url('<?= $item->team->logo ?>')"><?= $item->displayName ?></td>
+                            <td class="status_cn"><?= $item->statusCn ?></td>
+                            <td class="<?= $item->commentCn ? 'comment_cn' : 'comment' ?>" title="<?= $item->commentCn ?: $item->comment ?>"><?= mb_strimwidth($item->commentCn ?: $item->comment,0,35,'...') ?></td>
+                            <td class="injury"><?= $item->injury ?></td>
+                            <td><?= (new \DateTime($item->date, new \DateTimeZone('UTC')))->format('m-d') ?></td>
+                            <td><?= (new \DateTime($item->createtime, new \DateTimeZone('UTC')))->setTimezone(new \DateTimeZone('PRC'))->format('m-d H:i') ?></td>
+                            <td class="isshow"><?= $item->isShow ? '未翻译' : '已翻译' ?></td>
                         </tr>
-                        </thead>
-                        <tbody>
                         <?php
-                        foreach ($invalid as $key => $item) {
-                            ?>
-                            <tr class="translate danger" injuries-id="<?= $item->id ?>" style="cursor: pointer">
-                                <td><?= $item->displayName ?></td>
-                                <td class="status_cn"><?= $item->statusCn ?></td>
-                                <td class="<?= $item->commentCn ? 'comment_cn' : 'comment' ?>"><?= mb_strimwidth($item->commentCn ?: $item->comment,0,35,'...') ?></td>
-                                <td><?= (new \DateTime($item->date, new \DateTimeZone('UTC')))->format('m-d') ?></td>
-                                <td><?= (new \DateTime($item->createtime, new \DateTimeZone('UTC')))->setTimezone(new \DateTimeZone('PRC'))->format('m-d H:i') ?></td>
-                            </tr>
-                            <?php
-                        }
-                        ?>
-                        </tbody>
-                    </table>
-                </div>
+                    }
+                    ?>
+                    </tbody>
+                </table>
             </div>
+            <div role="tabpanel" class="tab-pane fade" id="invalid" aria-labelledby="invalid-tab">
 
+                <table class="table table-hover table-striped" id="list">
+                    <thead>
+                    <tr class="info">
+                        <th>球员</th>
+                        <th>状态</th>
+                        <th>摘要</th>
+                        <th>伤停</th>
+                        <th>发布时间</th>
+                        <th>采集时间</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <?php
+                    foreach ($invalid as $key => $item) {
+                        ?>
+                        <tr class="translate danger" injuries-id="<?= $item->id ?>" style="cursor: pointer">
+                            <td class = "team" style="background-image: url('<?= $item->team->logo ?>')"><?= $item->displayName ?></td>
+                            <td class="status_cn"><?= $item->statusCn ?></td>
+                            <td class="<?= $item->commentCn ? 'comment_cn' : 'comment' ?>"><?= mb_strimwidth($item->commentCn ?: $item->comment,0,35,'...') ?></td>
+                            <td class="injury"><?= $item->injury ?></td>
+                            <td><?= (new \DateTime($item->date, new \DateTimeZone('UTC')))->format('m-d') ?></td>
+                            <td><?= (new \DateTime($item->createtime, new \DateTimeZone('UTC')))->setTimezone(new \DateTimeZone('PRC'))->format('m-d H:i') ?></td>
+                        </tr>
+                        <?php
+                    }
+                    ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
     <div class="col-xs-12 col-md-4">
 
@@ -165,6 +168,18 @@
                     <div class="form-group center-block">
                         <div class="row">
                             <div class="col-md-2 hidden-sm hidden-xs">
+                                <label for="injury" class="form-control-static">伤停部位</label>
+                            </div>
+                            <div class="col-md-10">
+                                <input type="text" name="injury" id="injury" placeholder="伤停部位" class="form-control">
+                            </div>
+                        </div>
+                        <hr>
+                    </div>
+
+                    <div class="form-group center-block">
+                        <div class="row">
+                            <div class="col-md-2 hidden-sm hidden-xs">
                                 <label for="commentCn" class="form-control-static">评论</label>
                             </div>
                             <div class="col-md-10">
@@ -209,7 +224,7 @@
             }, "json");
         };
 
-        var setTableSuccess = function (id, comment_cn, status_cn) {
+        var setTableSuccess = function (id, status_cn, injury, comment_cn) {
             var tr = $(".translate[injuries-id='" + id + "']");
             if (!tr.hasClass('danger')) {
                 tr.removeClass('active');
@@ -217,6 +232,7 @@
             }
             tr.find('.isshow').text('已翻译');
             tr.find('.status_cn').text(status_cn);
+            tr.find('.injury').text(injury);
             var td = tr.find('.comment, .comment_cn');
             td.attr('title', comment_cn);
             if (comment_cn.length > 20) {
@@ -235,13 +251,15 @@
             $(this).attr("disabled", "true");
             var id = $('#id').val();
             var status_cn = $('#statusCn').val();
+            var injury = $('#injury').val();
             var comment_cn = $('#commentCn').val();
             $.post('api/update/' + id, {
                 statusCn: status_cn,
+                injury: injury,
                 commentCn: comment_cn
             }, function (data) {
                 if (data.status === 'success') {
-                    setTableSuccess(id, comment_cn, status_cn);
+                    setTableSuccess(id, status_cn, injury, comment_cn);
                     sweetAlert({
                         type: "success",
                         title: "提交成功!",

@@ -17,7 +17,7 @@ class IndexController extends BaseController
         ];
 
         $show_order !== null && $order[] = 'isShow' . ($show_order == 1 ? ' DESC' : '');
-        $create_order !== null && $order[] = 'createtime' . ($create_order == 1 ? ' DESC' : '');
+        $order[] = 'createtime' . ($create_order == 1 ? ' ASC' : ' DESC');
         $date_order !== null && $order[] = 'date' . ($date_order == 1 ? ' DESC' : '');
         // 加入排序条件
         empty($order) || $query['order'] = implode(',', $order);
@@ -25,6 +25,7 @@ class IndexController extends BaseController
         $injuries = NbaInjuries::find($query); // 实时信息
         $invalid = NbaInjuries::find([         // 失效信息
             'conditions' => 'isShow = 2',
+            'order' => 'createtime DESC',
         ]);
         $this->view->injuries = $injuries;
         $this->view->invalid = $invalid;
