@@ -50,7 +50,9 @@ class ApiController extends BaseController
         }
         // 合并结果集
         $injuries = array_merge($injuries, NbaInjuries::find($query)->toArray());
-
+        usort($injuries, function ($a, $b) {
+            return $a->dateCn > $b->dateCn;
+        });
         $this->response->setJsonContent($injuries);
         return $this->response;
     }
