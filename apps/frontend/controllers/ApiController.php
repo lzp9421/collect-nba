@@ -141,7 +141,7 @@ class ApiController extends BaseController
      * @param $id
      * @return \Phalcon\Http\Response|\Phalcon\Http\ResponseInterface
      */
-    public function resetAction($id)
+    public function invalidateAction($id)
     {
         $injuries = NbaInjuries::findFirst([
             "conditions" => "id = ?1",
@@ -149,7 +149,7 @@ class ApiController extends BaseController
                 1 => $id,
             ]
         ]);
-        $injuries->isShow == '0' && $injuries->isShow = 1;
+        $injuries->isShow = 2;
         if (!$injuries->save()) {
             return $this->response->setJsonContent(['status' => 'error', 'data' => $injuries->getMessages()]);
         }

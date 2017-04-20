@@ -113,7 +113,7 @@ class CollectController extends BaseController
             }
             $this->new_data++;
         } else {
-            $injuries->isShow > 1 && $injuries->isShow = 1;
+            // $injuries->isShow > 1 && $injuries->isShow = 1; // 还原失效信息
             $injuries->updatetime = $this->datatime;
         }
         $this->real_time_data++;
