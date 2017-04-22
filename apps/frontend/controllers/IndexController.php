@@ -24,7 +24,7 @@ class IndexController extends BaseController
 
         $injuries = NbaInjuries::find($query); // 实时信息
         $invalid = NbaInjuries::find([         // 失效信息
-            'conditions' => 'isShow = 2',
+            'conditions' => 'isShow >= 2',
             'order' => 'createtime DESC',
         ]);
         $this->view->injuries = $injuries;

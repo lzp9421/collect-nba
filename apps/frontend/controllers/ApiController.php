@@ -149,7 +149,7 @@ class ApiController extends BaseController
                 1 => $id,
             ]
         ]);
-        $injuries->isShow = 2;
+        $injuries->isShow = 3;
         if (!$injuries->save()) {
             return $this->response->setJsonContent(['status' => 'error', 'data' => $injuries->getMessages()]);
         }
