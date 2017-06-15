@@ -136,7 +136,10 @@
                                 <label for="displayName" class="form-control-static">球队</label>
                             </div>
                             <div class="col-md-10">
-                                <select name="displayName" id="displayName" class="form-control">
+                                <select name="teamId" id="teamId" class="form-control">
+                                    <?php foreach ($team as $value):?>
+                                        <option value="<?= $value['teamId'] ?>"><?= $value['name'] ?></option>
+                                    <?php endforeach; ?>
                                 </select>
                             </div>
                         </div>
@@ -243,6 +246,7 @@
 
         var show = function (func, id) {
             id = Number(id) ? Number(id) : 0;
+            $('#teamId').parents('.form-group').eq(0).addClass('sr-only');
             $.get('api/show/' + id, function (data) {
                 for (key in data) {
                     func($('#' + key), data[key]);
@@ -284,12 +288,14 @@
             var status_cn = $('#statusCn').val();
             var injury = $('#injury').val();
             var comment_cn = $('#commentCn').val();
+            var teamId = $('#teamId').val();
             $.post('api/update/' + id, {
                 displayName: display_name,
                 dateCn:date_cn,
                 statusCn: status_cn,
                 injury: injury,
-                commentCn: comment_cn
+                commentCn: comment_cn,
+                teamId: teamId
             }, function (data) {
                 if (data.status === 'success') {
                     setTableSuccess(id, status_cn, injury, comment_cn);
@@ -338,7 +344,7 @@
             }, function () {
 
                 $(that).attr("disabled", "true");
-                var id=new Array();
+                var id = new Array();
                 $('.invalidate-select:checked').each(function(){
                     id.push($(this).val());//向数组中添加元素
                 });
@@ -449,7 +455,8 @@
             input.text('');
             input.removeAttr('disabled');
             var text = panel.find('p');
-            text.text('　');
+            text.empty();
+            $('#teamId').parents('.form-group').eq(0).removeClass('sr-only');
         });
     });
 </script>

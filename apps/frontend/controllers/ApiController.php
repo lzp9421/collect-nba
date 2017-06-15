@@ -105,12 +105,11 @@ class ApiController extends BaseController
      * @param $id
      * @return \Phalcon\Http\Response|\Phalcon\Http\ResponseInterface
      */
-    public function updateAction($id)
+    public function updateAction($id = null)
     {
-
         if (!$id) {
             $injuries = new NbaInjuries;
-            $fields = ['displayName', 'dateCn', 'statusCn', 'injury', 'commentCn'];
+            $fields = ['displayName', 'dateCn', 'statusCn', 'injury', 'commentCn', 'teamId'];
         } else {
             $injuries = NbaInjuries::findFirst([
                 "conditions" => "id = ?1",

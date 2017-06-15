@@ -3,6 +3,7 @@
 namespace Multiple\Frontend\Controllers;
 
 use Multiple\Frontend\Models\NbaInjuries;
+use Multiple\Frontend\Models\NbaTeam;
 
 class IndexController extends BaseController
 {
@@ -29,6 +30,7 @@ class IndexController extends BaseController
         ]);
         $this->view->injuries = $injuries;
         $this->view->invalid = $invalid;
+        $this->view->team = NbaTeam::find()->toArray();
     }
 
 }
