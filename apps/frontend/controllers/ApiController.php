@@ -108,16 +108,21 @@ class ApiController extends BaseController
     public function updateAction($id)
     {
 
-        $injuries = NbaInjuries::findFirst([
-            "conditions" => "id = ?1",
-            "bind"       => [
-                1 => $id,
-            ]
-        ]);
+        if (!$id) {
+            $injuries = new NbaInjuries;
+            $fields = ['displayName', 'dateCn', 'statusCn', 'injury', 'commentCn'];
+        } else {
+            $injuries = NbaInjuries::findFirst([
+                "conditions" => "id = ?1",
+                "bind"       => [
+                    1 => $id,
+                ]
+            ]);
+            $fields = ['statusCn', 'injury', 'commentCn'];
+        }
         if ($injuries) {
             // 保存操作
             $errors = [];
-            $fields = ['statusCn', 'injury', 'commentCn'];
             foreach ($fields as $field) {
                 $value = trim(htmlspecialchars($this->request->get($field)));
                 empty($value) && $errors[] = "请填写${field}字段";
@@ -141,17 +146,20 @@ class ApiController extends BaseController
      * @param $id
      * @return \Phalcon\Http\Response|\Phalcon\Http\ResponseInterface
      */
-    public function invalidateAction($id)
+    public function invalidateAction()
     {
-        $injuries = NbaInjuries::findFirst([
-            "conditions" => "id = ?1",
+        $id = (array)$this->request->get('id');
+        $injuries = NbaInjuries::find([
+            "conditions" => "id IN ({id:array})",
             "bind"       => [
-                1 => $id,
+                'id' => $id,
             ]
         ]);
-        $injuries->isShow = 3;
-        if (!$injuries->save()) {
-            return $this->response->setJsonContent(['status' => 'error', 'data' => $injuries->getMessages()]);
+        foreach ($injuries as $injury) {
+            $injury->isShow = 3;
+            if (!$injury->save()) {
+                return $this->response->setJsonContent(['status' => 'error', 'data' => $injury->getMessages()]);
+            }
         }
         return $this->response->setJsonContent(['status' => 'success', 'data' => '']);
     }

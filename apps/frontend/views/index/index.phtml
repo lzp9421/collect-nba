@@ -35,6 +35,11 @@
             background-size: 36px;
             background-position: 100% 50%;
         }
+        .translate label {
+            width: 100%;
+            height: 100%;
+            text-align: center;
+        }
     </style>
 </head>
 <body class="container-fluid">
@@ -56,6 +61,7 @@
                         <th><?= $this->tag->linkTo(['?date_order=' . intval(!(isset($_GET['date_order'])? $_GET['date_order'] : '0')), '发布时间']) ?></th>
                         <th><?= $this->tag->linkTo(['?create_order=' . intval(!(isset($_GET['create_order'])? $_GET['create_order'] : '0')), '采集时间']) ?></th>
                         <th><?= $this->tag->linkTo(['?show_order=' . intval(!(isset($_GET['show_order'])? $_GET['show_order'] : '0')), '状态']) ?></th>
+                        <th><a class="btn btn-warning btn-xs" id="invalidate-all">标记为失效</a></th>
                     </tr>
                     </thead>
                     <tbody>
@@ -63,13 +69,14 @@
                     foreach ($injuries as $key => $item) {
                         ?>
                         <tr class="translate <?= $item->isShow ? 'active' : 'success' ?>" injuries-id="<?= $item->id ?>" style="cursor: pointer">
-                            <td class = "team" style="background-image: url('<?= $item->team->logo ?>')"><?= $item->displayName ?></td>
+                            <td class = "team" style="background-image: url('<?= !$item->team ?: $item->team->logo ?>')"><?= $item->displayName ?></td>
                             <td class="status_cn"><?= $item->statusCn ?></td>
                             <td class="<?= $item->commentCn ? 'comment_cn' : 'comment' ?>" title="<?= $item->commentCn ?: $item->comment ?>"><?= mb_strimwidth($item->commentCn ?: $item->comment,0,35,'...') ?></td>
                             <td class="injury"><?= $item->injury ?></td>
                             <td><?= (new \DateTime($item->date, new \DateTimeZone('UTC')))->format('m-d') ?></td>
                             <td><?= (new \DateTime($item->createtime, new \DateTimeZone('UTC')))->setTimezone(new \DateTimeZone('PRC'))->format('m-d H:i') ?></td>
                             <td class="isshow"><?= $item->isShow ? '未翻译' : '已翻译' ?><?= $item->isNew() ? '<span class="badge" style="background: #ff3d00">new</span>' : '' ?></td>
+                            <td><label><input type="checkbox" name="selected" class="invalidate-select" value="<?= $item->id ?>"></label></td>
                         </tr>
                         <?php
                     }
@@ -116,11 +123,25 @@
             <div class="panel-heading" style="height: 38px;">
                 <h3 class="panel-title pull-left">翻译</h3>
                 <button type="button" id="invalidate" class="pull-right btn btn-xs btn-warning" style="position: relative;top:-2px;">标记为失效</button>
+                <button type="button" id="insert" class="pull-right btn btn-xs btn-info" style="position: relative;top:-2px; margin-right: 4px;">手动添加</button>
             </div>
             <div class="panel-body">
                 <form>
 
                     <input type="hidden" id="id" class="sr-only">
+
+                    <div class="form-group center-block sr-only">
+                        <div class="row">
+                            <div class="col-md-2 hidden-sm hidden-xs">
+                                <label for="displayName" class="form-control-static">球队</label>
+                            </div>
+                            <div class="col-md-10">
+                                <select name="displayName" id="displayName" class="form-control">
+                                </select>
+                            </div>
+                        </div>
+                        <hr>
+                    </div>
 
                     <div class="form-group center-block">
                         <div class="row">
@@ -128,10 +149,8 @@
                                 <label for="displayName" class="form-control-static">球员</label>
                             </div>
                             <div class="col-md-10">
-                                <p class="well well-sm">
-                                    <span id="displayName"></span>
-                                    (<span id="displayNameEn" class="text-muted"></span>)
-                                </p>
+                                <input type="text" name="displayName" id="displayName" placeholder="状态" class="form-control" disabled>
+                                <p id="displayNameEn" class="help-block">　</p>
                             </div>
                         </div>
                         <hr>
@@ -143,10 +162,8 @@
                                 <label for="dateCN" class="form-control-static">日期</label>
                             </div>
                             <div class="col-md-10">
-                                <p class="well well-sm">
-                                    <span id="dateCn"></span>
-                                    (<span id="date" class="text-muted"></span>)
-                                </p>
+                                <input type="text" name="dateCn" id="dateCn" placeholder="状态" class="form-control" disabled>
+                                <p id="date" class="help-block">　</p>
                             </div>
                         </div>
                         <hr>
@@ -262,16 +279,24 @@
             var that = this;
             $(this).attr("disabled", "true");
             var id = $('#id').val();
+            var display_name = $('#displayName').val();
+            var date_cn = $('#dateCn').val();
             var status_cn = $('#statusCn').val();
             var injury = $('#injury').val();
             var comment_cn = $('#commentCn').val();
             $.post('api/update/' + id, {
+                displayName: display_name,
+                dateCn:date_cn,
                 statusCn: status_cn,
                 injury: injury,
                 commentCn: comment_cn
             }, function (data) {
                 if (data.status === 'success') {
                     setTableSuccess(id, status_cn, injury, comment_cn);
+                    if (!$('#id').val()) {
+                        location.reload();
+                        return;
+                    }
                     sweetAlert({
                         type: "success",
                         title: "提交成功!",
@@ -299,6 +324,59 @@
             }, "json");
         });
 
+        $('#invalidate-all').on('click', function () {
+            var that = this;
+            swal({
+                title: '确定要将所选消息标记为失效吗？',
+                text: '该操作将不可逆',
+                type: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#DD6B55',
+                confirmButtonText: '确定删除',
+                cancelButtonText: '取消',
+                closeOnConfirm: false
+            }, function () {
+
+                $(that).attr("disabled", "true");
+                var id=new Array();
+                $('.invalidate-select:checked').each(function(){
+                    id.push($(this).val());//向数组中添加元素
+                });
+                $.get('api/invalidate', {id: id}, function (data) {
+                    if (data.status === 'success') {
+                        var tr = $(".translate[injuries-id='" + id + "']");
+                        if (!tr.hasClass('danger')) {
+                            tr.slideUp(1000);
+                        }
+                        tr.find('.isshow').text('未翻译');
+                        var injuries = $('#injuries-tab').find('.badge');
+                        var invalid = $('#invalid-tab').find('.badge');
+                        console.log(invalid.text());
+                        injuries.text(injuries.text() - 1);
+                        invalid.text(parseInt(invalid.text()) + 1);
+                        swal({
+                            type: "success",
+                            title: "标记成功!",
+                            timer: 800,
+                            showConfirmButton: false
+                        });
+                    } else {
+                        swal({
+                            type: "error",
+                            title: "标记失败!",
+                            text: data.data,
+                            timer: 5000,
+                            showConfirmButton: true
+                        });
+                    }
+                    $(that).removeAttr("disabled");
+                }, 'json');
+                setTimeout(function () {
+                    location.reload();
+                }, 800);
+            });
+        });
+
         $('#invalidate').on('click', function () {
             var that = this;
             swal({
@@ -314,7 +392,7 @@
 
                 $(that).attr("disabled", "true");
                 var id = $('#id').val();
-                $.get('api/invalidate/' + id, function (data) {
+                $.get('api/invalidate', {id: id}, function (data) {
                     if (data.status === 'success') {
                         var tr = $(".translate[injuries-id='" + id + "']");
                         if (!tr.hasClass('danger')) {
@@ -348,18 +426,30 @@
         });
         
         $('.translate').on('click', function () {
+            var input = $('#displayName,#dateCn');
             show(function (obj, value) {
                 obj.animate({opacity: 0}, function () {
                     obj.text(value);
                     obj.val(value);
                     obj.animate({opacity: 1});
+                    input.attr('disabled', 'true');
                 });
             }, $(this).attr('injuries-id'));
         });
 
-        $('#msg-tabs a').click(function (e) {
+        $('#msg-tabs').find('a').click(function (e) {
             e.preventDefault();
             $(this).tab('show');
+        });
+
+        $('#insert').on('click', function (e) {
+            var panel = $('.panel-body');
+            var input = panel.find('input,textarea');
+            input.val('');
+            input.text('');
+            input.removeAttr('disabled');
+            var text = panel.find('p');
+            text.text('　');
         });
     });
 </script>
