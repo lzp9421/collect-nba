@@ -4,6 +4,7 @@ namespace Multiple\Frontend\Controllers;
 
 use Multiple\Frontend\Models\NbaInjuries;
 use Multiple\Frontend\Models\NbaPlayer;
+use Multiple\Frontend\Models\NbaTeam;
 
 class ApiController extends BaseController
 {
@@ -110,6 +111,13 @@ class ApiController extends BaseController
         if (!$id) {
             $injuries = new NbaInjuries;
             $fields = ['displayName', 'dateCn', 'statusCn', 'injury', 'commentCn', 'teamId'];
+            $team = NbaTeam::findFirstByTeamId($this->request->get('teamId', 'int'));
+            if (!$team) {
+                return $this->response->setJsonContent(['status' => 'error', 'data' => '不存在该球队']);
+            }
+            if (!preg_match('/\d{1,1}[\-\/\\\.\, ]+\d{1,1}/i', $this->request->get('dateCn'))) {
+                return $this->response->setJsonContent(['status' => 'error', 'data' => '日期不合法，正确的格式为00-00']);
+            }
         } else {
             $injuries = NbaInjuries::findFirst([
                 "conditions" => "id = ?1",
@@ -126,6 +134,16 @@ class ApiController extends BaseController
                 $value = trim(htmlspecialchars($this->request->get($field)));
                 empty($value) && $errors[] = "请填写${field}字段";
                 $injuries->$field = $value;
+            }
+            $time = preg_split('/[\-\/\\\.\, ]+/i', $this->request->get('dateCn'));
+            $time = sprintf('2017-%02d-%02d', $time[0], $time[1]);
+            $this->request->get('dateCn') && $injuries->dateCn = date('m月d日', strtotime($time));
+            $this->request->get('dateCn') && $injuries->date = date('M j', strtotime($time));
+            $injuries->createtime = date('Y-m-d H:i:s');
+            $injuries->updatetime = date('Y-m-d H:i:s');
+            if (!empty($team)) {
+                $injuries->teamName = $team->name;
+                $injuries->teamCode = $team->teamCode;
             }
             if (empty($errors)) {
                 $injuries->isShow == '1' && $injuries->isShow = 0;
